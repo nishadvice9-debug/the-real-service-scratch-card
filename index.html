@@ -3,55 +3,76 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Real Service - Scratch Card</title>
+<title>The Real Service - Digital Scratch Card</title>
+
 <style>
 *{box-sizing:border-box}
+
 body{
 margin:0;
 font-family:Arial,sans-serif;
-background:linear-gradient(135deg,#050505,#222);
+background:linear-gradient(135deg,#050505,#260000);
 color:#fff;
-text-align:center
+text-align:center;
 }
+
 .container{
-max-width:500px;
+max-width:520px;
 margin:auto;
-padding:20px 15px 40px
+padding:18px 14px 40px;
 }
+
 .logo{
-font-size:30px;
+font-size:29px;
 font-weight:900;
-color:#ffd700
+color:#ffd700;
 }
+
 .tagline{
 font-size:14px;
-margin:5px 0 20px
+margin:5px 0 18px;
 }
+
 .card{
 background:#111;
 border:2px solid #d4af37;
 border-radius:20px;
 padding:20px 15px;
-box-shadow:0 0 25px #000
+box-shadow:0 0 25px #000;
 }
+
 h1{
 color:#ffd700;
-font-size:26px
+font-size:25px;
+margin:5px 0 10px;
 }
+
+.cardno{
+display:inline-block;
+background:#ffd700;
+color:#111;
+padding:7px 15px;
+border-radius:20px;
+font-weight:bold;
+margin-bottom:15px;
+}
+
 .subtitle{
 font-size:15px;
-margin-bottom:18px
+margin-bottom:18px;
 }
+
 .scratchBox{
 position:relative;
 width:100%;
-height:220px;
+height:230px;
 margin:auto;
 border:3px solid #ffd700;
 border-radius:15px;
 overflow:hidden;
-background:#fff
+background:#fff;
 }
+
 .prize{
 width:100%;
 height:100%;
@@ -61,22 +82,33 @@ justify-content:center;
 padding:20px;
 color:#111;
 background:linear-gradient(135deg,#fff7c2,#ffd700);
-font-size:23px;
-font-weight:bold
+font-size:22px;
+font-weight:bold;
 }
+
 canvas{
 position:absolute;
 top:0;
 left:0;
 width:100%;
 height:100%;
-touch-action:none
+touch-action:none;
 }
+
 .instruction{
 font-size:14px;
 margin:15px 0;
-color:#ddd
+color:#ddd;
 }
+
+.success{
+display:none;
+color:#ffd700;
+font-weight:bold;
+font-size:17px;
+margin:15px 0;
+}
+
 .button{
 display:block;
 width:100%;
@@ -85,35 +117,40 @@ margin:10px 0;
 border-radius:12px;
 font-size:16px;
 font-weight:bold;
-text-decoration:none
+text-decoration:none;
 }
+
 .winner{
 background:#ffd700;
-color:#111
+color:#111;
 }
+
 .offer{
 background:#b30000;
-color:#fff
+color:#fff;
 }
+
 .whatsapp{
 background:#128c7e;
-color:#fff
+color:#fff;
 }
+
+.share{
+background:#444;
+color:#fff;
+}
+
 .phone{
 background:#222;
 color:#ffd700;
-border:1px solid #ffd700
+border:1px solid #ffd700;
 }
-.success{
-display:none;
-color:#ffd700;
-font-weight:bold;
-margin:15px
-}
+
 .footer{
 margin-top:20px;
 font-size:13px;
-color:#aaa
+color:#aaa;
+line-height:1.6;
 }
 </style>
 </head>
@@ -131,6 +168,10 @@ Marketing by The Real Service
 <div class="card">
 
 <h1>🎁 DIGITAL SCRATCH CARD</h1>
+
+<div class="cardno" id="cardNo">
+Card No. TRS0001
+</div>
 
 <div class="subtitle">
 Scratch करें और अपना Gift देखें
@@ -174,6 +215,10 @@ target="_blank">
 📲 Showroom Image & Video - WhatsApp Channel
 </a>
 
+<button class="button share" onclick="shareCard()">
+📲 यह Scratch Card WhatsApp पर भेजें
+</button>
+
 <div class="button phone">
 📞 More Information: 7827211493
 </div>
@@ -189,82 +234,214 @@ Trust • Service • Connection • Growth
 
 <script>
 
-const canvas=document.getElementById("scratchCanvas");
-const ctx=canvas.getContext("2d");
-const box=document.querySelector(".scratchBox");
-const success=document.getElementById("success");
+/* =========================
+   CARD NUMBER
+   TRS001 - TRS2500
+========================= */
 
-const prizes=[
-"🎁 FREE GIFT COUPON VOUCHER",
-"💰 CASH COUPON VOUCHER",
-"🚗 CAR SERVICE OFFER",
-"🎉 FREE GIFT"
+const params = new URLSearchParams(window.location.search);
+
+let cardNumber = params.get("card");
+
+if(!cardNumber){
+cardNumber = "TRS0001";
+}
+
+cardNumber = cardNumber.toUpperCase();
+
+document.getElementById("cardNo").innerText =
+"Card No. " + cardNumber;
+
+
+/* =========================
+   10 SCRATCH GIFTS
+========================= */
+
+const prizes = [
+
+"🎁 PMS ₹1200 Cash Coupon Voucher",
+
+"🚗 CAR WASHING FREE",
+
+"💻 ₹1200 CAR SCANNING FREE",
+
+"📱 CAR MOBILE HOLDER CASH COUPON VOUCHER",
+
+"✨ DASHBOARD POLISH FREE",
+
+"🧴 GLASS CLEANER FREE",
+
+"🎧 EARPHONE FREE",
+
+"🔌 DATA CABLE FREE",
+
+"⌚ SMART WATCH CASH COUPON VOUCHER",
+
+"💡 AC/DC BULB FREE"
+
 ];
 
-document.getElementById("prize").innerHTML=
-"🎉 CONGRATULATIONS! 🎉<br>"+
-prizes[Math.floor(Math.random()*prizes.length)];
+
+/* =========================
+   CARD NUMBER SE FIXED GIFT
+========================= */
+
+function getPrize(card){
+
+let number =
+parseInt(card.replace(/\D/g,"")) || 1;
+
+let index = (number - 1) % prizes.length;
+
+return prizes[index];
+
+}
+
+document.getElementById("prize").innerHTML =
+"🎉 CONGRATULATIONS! 🎉<br><br>" +
+getPrize(cardNumber);
+
+
+/* =========================
+   SCRATCH CARD
+========================= */
+
+const canvas =
+document.getElementById("scratchCanvas");
+
+const ctx =
+canvas.getContext("2d");
+
+const box =
+document.querySelector(".scratchBox");
+
+const success =
+document.getElementById("success");
 
 function setup(){
 
-let r=box.getBoundingClientRect();
+let r = box.getBoundingClientRect();
 
-canvas.width=r.width;
-canvas.height=r.height;
+canvas.width = r.width;
+canvas.height = r.height;
 
-ctx.globalCompositeOperation="source-over";
+ctx.globalCompositeOperation =
+"source-over";
 
-let g=ctx.createLinearGradient(0,0,canvas.width,canvas.height);
+let g =
+ctx.createLinearGradient(
+0,0,
+canvas.width,
+canvas.height
+);
+
 g.addColorStop(0,"#666");
 g.addColorStop(.5,"#ccc");
 g.addColorStop(1,"#777");
 
-ctx.fillStyle=g;
-ctx.fillRect(0,0,canvas.width,canvas.height);
+ctx.fillStyle = g;
+
+ctx.fillRect(
+0,
+0,
+canvas.width,
+canvas.height
+);
 
 ctx.fillStyle="#222";
+
 ctx.font="bold 24px Arial";
+
 ctx.textAlign="center";
-ctx.fillText("SCRATCH HERE",canvas.width/2,canvas.height/2);
+
+ctx.fillText(
+"SCRATCH HERE",
+canvas.width/2,
+canvas.height/2
+);
 
 ctx.font="bold 15px Arial";
-ctx.fillText("🎁 YOUR GIFT 🎁",canvas.width/2,canvas.height/2+30);
 
-ctx.globalCompositeOperation="destination-out";
+ctx.fillText(
+"🎁 YOUR GIFT 🎁",
+canvas.width/2,
+canvas.height/2+30
+);
+
+ctx.globalCompositeOperation =
+"destination-out";
+
 }
 
 setup();
 
+
 let scratching=false;
 let revealed=false;
 
+
 function position(e){
 
-let r=canvas.getBoundingClientRect();
+let r =
+canvas.getBoundingClientRect();
 
-return{
-x:(e.clientX-r.left)*canvas.width/r.width,
-y:(e.clientY-r.top)*canvas.height/r.height
+return {
+
+x:
+(e.clientX-r.left)
+*canvas.width/r.width,
+
+y:
+(e.clientY-r.top)
+*canvas.height/r.height
+
 };
 
 }
 
-canvas.addEventListener("pointerdown",e=>{
+
+canvas.addEventListener(
+"pointerdown",
+e=>{
+
 scratching=true;
+
 scratch(e);
-});
 
-canvas.addEventListener("pointermove",e=>{
-if(scratching)scratch(e);
-});
+}
+);
 
-canvas.addEventListener("pointerup",()=>{
+
+canvas.addEventListener(
+"pointermove",
+e=>{
+
+if(scratching)
+scratch(e);
+
+}
+);
+
+
+canvas.addEventListener(
+"pointerup",
+()=>{
+
 scratching=false;
-});
 
-canvas.addEventListener("pointerleave",()=>{
+}
+);
+
+
+canvas.addEventListener(
+"pointerleave",
+()=>{
+
 scratching=false;
-});
+
+}
+);
+
 
 function scratch(e){
 
@@ -273,36 +450,88 @@ e.preventDefault();
 let p=position(e);
 
 ctx.beginPath();
-ctx.arc(p.x,p.y,25,0,Math.PI*2);
+
+ctx.arc(
+p.x,
+p.y,
+25,
+0,
+Math.PI*2
+);
+
 ctx.fill();
 
 check();
 
 }
 
+
 function check(){
 
-if(revealed)return;
+if(revealed)
+return;
 
-let data=ctx.getImageData(
-0,0,canvas.width,canvas.height
+let data =
+ctx.getImageData(
+0,
+0,
+canvas.width,
+canvas.height
 ).data;
 
 let clear=0;
 
-for(let i=3;i<data.length;i+=4){
+for(
+let i=3;
+i<data.length;
+i+=4
+){
 
-if(data[i]<80)clear++;
+if(data[i]<80)
+clear++;
 
 }
 
-if(clear/(data.length/4)>.45){
+if(
+clear/(data.length/4)>.45
+){
 
 revealed=true;
+
 canvas.style.display="none";
+
 success.style.display="block";
 
 }
+
+}
+
+
+/* =========================
+   WHATSAPP SHARE
+========================= */
+
+function shareCard(){
+
+let url =
+window.location.href;
+
+let message =
+"🎁 The Real Service Digital Scratch Card\n\n" +
+"आपका Scratch Card: " +
+cardNumber +
+"\n\n" +
+"Scratch करने के लिए link खोलें:\n" +
+url;
+
+let whatsapp =
+"https://wa.me/?text=" +
+encodeURIComponent(message);
+
+window.open(
+whatsapp,
+"_blank"
+);
 
 }
 
